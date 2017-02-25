@@ -347,27 +347,27 @@ bool TaggerImpl::add(size_t size, const char **column) {
 
 bool TaggerImpl::add(const char* line) {
   char *p = allocator_->strdup(line);
-  scoped_fixed_array<const char *, 8192> column;
-  const size_t size = tokenize2(p, "\t ", column.get(), column.size());
-  if (!add2(size, column.get(), false)) {
+  const char* columns[640];
+  const size_t size = tokenize2(p, "\t ", columns, sizeof(columns));
+  if (!add2(size, columns, false)) {
     return false;
   }
   return true;
 }
 
 bool TaggerImpl::read(std::istream *is) {
-  scoped_fixed_array<char, 8192> line;
+  char line[8192];
   clear();
 
   for (;;) {
-    if (!is->getline(line.get(), line.size())) {
+    if (!is->getline(line, sizeof(line))) {
       is->clear(std::ios::eofbit|std::ios::badbit);
       return true;
     }
     if (line[0] == '\0' || line[0] == ' ' || line[0] == '\t') {
       break;
     }
-    if (!add(line.get())) {
+    if (!add(line)) {
       return false;
     }
   }

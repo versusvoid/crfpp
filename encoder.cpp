@@ -364,8 +364,8 @@ bool Encoder::learn(const char *templfile,
 
       _x->set_thread_id(line % thread_num);
 
-      if (++line % 100 == 0) {
-        std::cout << line << ".. " << std::flush;
+      if (++line % 10000 == 0) {
+        std::cout << line << ".. " << std::endl;
       }
     }
 

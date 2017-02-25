@@ -5,11 +5,24 @@ ACLOCAL_AMFLAGS = -I m4
 
 AUTOMAKE_OPTIONS = no-dependencies
 lib_LTLIBRARIES = libcrfpp.la
-libcrfpp_la_SOURCES = crfpp.h thread.h libcrfpp.cpp lbfgs.cpp scoped_ptr.h param.cpp param.h encoder.cpp feature.cpp stream_wrapper.h \
-                      feature_cache.cpp feature_index.cpp node.cpp path.cpp tagger.cpp \
-		      common.h darts.h encoder.h feature_cache.h feature_index.h \
-                      freelist.h lbfgs.h mmap.h node.h path.h tagger.h timer.h winmain.h
+libcrfpp_la_SOURCES = libcrfpp.cpp lbfgs.cpp param.cpp encoder.cpp feature.cpp \
+                      feature_cache.cpp feature_index.cpp node.cpp path.cpp tagger.cpp
 include_HEADERS = crfpp.h
+
+if HAVE_EMCC
+EMCCCOMPILE = $(subst $(CXX),emcc,$(CXXCOMPILE))
+all-local: js/libcrfpp.bc
+
+.cpp.bc:
+	$(EMCCCOMPILE) $< -o $@
+
+js/libcrfpp.bc: $(libcrfpp_la_SOURCES:.cpp=.bc)
+	$(EMCCCOMPILE) $^ -o js/libcrfpp.bc
+
+clean-local:
+	rm -f *.bc
+	rm -f js/libcrfpp.bc
+endif
 
 dist-hook:
 	for subdir in $(EXTRA_DIRS); do \
@@ -37,20 +50,20 @@ win-dist:
 	cp -f libcrfpp.lib @PACKAGE@-@VERSION@/sdk
 	cp -f crfpp.h @PACKAGE@-@VERSION@/sdk
 #	cp -f sdk/model @PACKAGE@-@VERSION@/sdk
-	cp -f sdk/example.cpp @PACKAGE@-@VERSION@/sdk	
+	cp -f sdk/example.cpp @PACKAGE@-@VERSION@/sdk
 	cp -fr doc/*.html doc/*.css doc/doxygen @PACKAGE@-@VERSION@/doc
 	cp -f README COPYING AUTHORS LGPL BSD @PACKAGE@-@VERSION@
 	cp -fr example/* @PACKAGE@-@VERSION@/example
 	find @PACKAGE@-@VERSION@ -name CVS | xargs rm -rf
-	find @PACKAGE@-@VERSION@ -name .svn | xargs rm -rf	
+	find @PACKAGE@-@VERSION@ -name .svn | xargs rm -rf
 	zip -r @PACKAGE@-@VERSION@.zip @PACKAGE@-@VERSION@
 	rm -fr @PACKAGE@-@VERSION@
 
-crf_learn_SOURCES = crf_learn.cpp 
+crf_learn_SOURCES = crf_learn.cpp
 crf_learn_LDADD = libcrfpp.la
 
-crf_test_SOURCES = crf_test.cpp 
-crf_test_LDADD = libcrfpp.la 
+crf_test_SOURCES = crf_test.cpp
+crf_test_LDADD = libcrfpp.la
 
 dist-all-package:
 	(test -f Makefile) && $(MAKE) distclean

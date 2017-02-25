@@ -213,7 +213,9 @@ class string_buffer: public std::string {
   string_buffer& operator<<(unsigned short int _n) { _UITOA(_n); }
   string_buffer& operator<<(unsigned int _n)       { _UITOA(_n); }
   //  string_buffer& operator<<(unsigned long int _n)  { _UITOA(_n); }
+#if !__GNUC__ || __x86_64__
   string_buffer& operator<<(size_t _n)             { _UITOA(_n); }
+#endif
   string_buffer& operator<<(char _n) {
     push_back(_n);
     return *this;
