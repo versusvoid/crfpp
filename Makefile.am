@@ -17,6 +17,7 @@ all-local: js/libcrfpp.bc
 	$(EMCCCOMPILE) $< -o $@
 
 js/libcrfpp.bc: $(libcrfpp_la_SOURCES:.cpp=.bc)
+	mkdir -p js
 	$(EMCCCOMPILE) $^ -o js/libcrfpp.bc
 
 clean-local:
